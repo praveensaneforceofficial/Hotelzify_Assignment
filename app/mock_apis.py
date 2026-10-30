@@ -3,16 +3,17 @@ import uuid
 import time
 from typing import Dict, Any, Optional
 
-# 10 Products Catalog: 3 Required Evaluation Items + 7 Smart Hotel Products
+# 10 Products Catalog in Indian Rupees (INR - ₹)
+# Realistic hotel tech pricing in INR
 CATALOG: Dict[str, Dict[str, Any]] = {
     # 1. Core Required Evaluation Item 1
     "SKU_AIRPODS_PRO2": {
         "name": "AirPods Pro 2nd Gen",
-        "description": "Active Noise Cancelling audio for guest VIP suites and personal communication.",
+        "description": "Active Noise Cancelling audio for VIP suites and personal communication.",
         "max_capacity_per_unit": 1,
         "plans": {
-            "STD": 249.0,
-            "CARE": 279.0
+            "STD": 20000.0,
+            "CARE": 24000.0
         },
         "aliases": ["airpods", "airpod pro", "apple airpods", "airpod", "pods", "airpods pro 2nd gen"]
     },
@@ -22,8 +23,8 @@ CATALOG: Dict[str, Dict[str, Any]] = {
         "description": "Ultra-fast enterprise-grade Wi-Fi mesh coverage (1 unit covers up to 2 rooms).",
         "max_capacity_per_unit": 2,
         "plans": {
-            "STD": 399.0,
-            "PRO": 499.0
+            "STD": 30000.0,
+            "PRO": 40000.0
         },
         "aliases": ["aeromesh", "arrow mesh wifi", "arrow mesh", "aero mesh", "mesh wifi", "mesh router", "aeromesh wifi"]
     },
@@ -33,8 +34,8 @@ CATALOG: Dict[str, Dict[str, Any]] = {
         "description": "All-in-one AI audio/video conference bar for meeting rooms and group spaces (1 unit covers up to 3 rooms/tables).",
         "max_capacity_per_unit": 3,
         "plans": {
-            "STD": 899.0,
-            "PRO": 1150.0
+            "STD": 70000.0,
+            "PRO": 90000.0
         },
         "aliases": ["synchub", "sink hub", "sync hub", "conference bar", "meeting bar", "synchub conference bar"]
     },
@@ -44,8 +45,8 @@ CATALOG: Dict[str, Dict[str, Any]] = {
         "description": "Keyless RFID and Bluetooth hotel door lock (1 lock covers 1 room/door).",
         "max_capacity_per_unit": 1,
         "plans": {
-            "STD": 180.0,
-            "PRO": 220.0
+            "STD": 15000.0,
+            "PRO": 18000.0
         },
         "aliases": ["smart lock", "hotel lock", "door lock", "kwikstay", "rfid lock", "keyless lock"]
     },
@@ -55,8 +56,8 @@ CATALOG: Dict[str, Dict[str, Any]] = {
         "description": "Automated energy-saving thermostat (1 unit controls climate for up to 4 rooms/zone).",
         "max_capacity_per_unit": 4,
         "plans": {
-            "STD": 320.0,
-            "PRO": 410.0
+            "STD": 25000.0,
+            "PRO": 32000.0
         },
         "aliases": ["ecosense", "thermostat", "ac controller", "climate hub", "smart thermostat"]
     },
@@ -66,8 +67,8 @@ CATALOG: Dict[str, Dict[str, Any]] = {
         "description": "In-room guest service ordering and interactive tablet (1 tablet per 1 room).",
         "max_capacity_per_unit": 1,
         "plans": {
-            "STD": 150.0,
-            "PRO": 195.0
+            "STD": 12000.0,
+            "PRO": 16000.0
         },
         "aliases": ["roomtouch", "guest tablet", "concierge tablet", "room tablet", "in-room tablet"]
     },
@@ -77,8 +78,8 @@ CATALOG: Dict[str, Dict[str, Any]] = {
         "description": "High-definition night-vision corridor security camera (1 camera monitors 3 corridors/areas).",
         "max_capacity_per_unit": 3,
         "plans": {
-            "STD": 260.0,
-            "PRO": 340.0
+            "STD": 22000.0,
+            "PRO": 28000.0
         },
         "aliases": ["omnieye", "security camera", "cctv", "dome camera", "corridor camera"]
     },
@@ -88,8 +89,8 @@ CATALOG: Dict[str, Dict[str, Any]] = {
         "description": "Voice-enabled room service and music speaker for suites (1 speaker per 1 suite).",
         "max_capacity_per_unit": 1,
         "plans": {
-            "STD": 110.0,
-            "PRO": 140.0
+            "STD": 9000.0,
+            "PRO": 12000.0
         },
         "aliases": ["roomvoice", "smart speaker", "voice assistant", "room speaker"]
     },
@@ -99,8 +100,8 @@ CATALOG: Dict[str, Dict[str, Any]] = {
         "description": "Central multi-protocol IoT hub connecting hotel sensors (1 gateway manages up to 8 rooms).",
         "max_capacity_per_unit": 8,
         "plans": {
-            "STD": 450.0,
-            "PRO": 580.0
+            "STD": 38000.0,
+            "PRO": 48000.0
         },
         "aliases": ["ziglink", "iot gateway", "zigbee gateway", "sensor hub", "iot hub"]
     },
@@ -110,8 +111,8 @@ CATALOG: Dict[str, Dict[str, Any]] = {
         "description": "Intelligent automated ambient LED lighting kit (1 pack covers 2 rooms).",
         "max_capacity_per_unit": 2,
         "plans": {
-            "STD": 210.0,
-            "PRO": 280.0
+            "STD": 18000.0,
+            "PRO": 24000.0
         },
         "aliases": ["luminamesh", "smart lighting", "room lights", "led pack", "lumina light"]
     }
@@ -137,10 +138,9 @@ def log_api_call(api_name: str, method: str, payload: Any, response: Any, durati
 async def get_catalog_info(query: Optional[str] = None) -> Dict[str, Any]:
     """
     GET /api/catalog mock implementation.
-    Returns available packages, capacities, and pricing.
+    Returns available packages, capacities, and pricing in INR (₹).
     """
     t0 = time.time()
-    # Clean output without internal aliases for the API contract
     catalog_view = {}
     for sku_id, item in CATALOG.items():
         if query:
@@ -149,6 +149,7 @@ async def get_catalog_info(query: Optional[str] = None) -> Dict[str, Any]:
                 continue
         catalog_view[sku_id] = {
             "name": item["name"],
+            "currency": "INR",
             "max_capacity_per_unit": item["max_capacity_per_unit"],
             "plans": item["plans"]
         }
@@ -166,7 +167,7 @@ async def create_booking(
 ) -> Dict[str, Any]:
     """
     POST /api/bookings mock implementation.
-    Simulates ~1.5s network delay and creates a confirmed booking.
+    Simulates ~1.5s network delay and creates a confirmed booking in INR.
     """
     t0 = time.time()
     payload = {
@@ -174,10 +175,10 @@ async def create_booking(
         "plan_code": plan_code,
         "quantity": quantity,
         "promo_code": promo_code,
-        "final_price": final_price
+        "final_price": final_price,
+        "currency": "INR"
     }
     
-    # Validation against catalog
     if sku_id not in CATALOG:
         raise ValueError(f"Invalid SKU: '{sku_id}' not found in catalog.")
     
@@ -188,7 +189,7 @@ async def create_booking(
     if quantity <= 0:
         raise ValueError(f"Quantity must be greater than zero. Got: {quantity}")
 
-    # Simulate ~1.5 seconds processing time (as required in Scenario 4)
+    # Simulate ~1.5 seconds processing time
     await asyncio.sleep(1.5)
 
     booking_id = f"BKG-{uuid.uuid4().hex[:8].upper()}"
@@ -200,6 +201,7 @@ async def create_booking(
         "plan_code": plan_code,
         "quantity": quantity,
         "promo_code": promo_code,
+        "currency": "INR",
         "final_price": round(final_price, 2),
         "created_at": time.time()
     }

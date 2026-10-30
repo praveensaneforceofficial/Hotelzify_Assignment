@@ -20,6 +20,7 @@ class SessionState(BaseModel):
     required_capacity: Optional[int] = None
     quantity: int = 0
     unit_price: float = 0.0
+    currency: str = "INR"
     discount_tier: int = 0
     promo_code: Optional[str] = None
     discount_rate: float = 0.0
@@ -137,7 +138,7 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
             res = state.booking_result
             return {
                 "action": "ALREADY_BOOKED",
-                "message": f"Your order is already confirmed! Booking ID: {res['booking_id']} for {res['quantity']} unit(s) of {res['product_name']} ({res['plan_code']}) at ${res['final_price']:.2f}.",
+                "message": f"Your order is already confirmed! Booking ID: {res['booking_id']} for {res['quantity']} unit(s) of {res['product_name']} ({res['plan_code']}) at ₹{res['final_price']:,.2f}.",
                 "state": state.model_dump(),
                 "executed_api": None
             }
@@ -266,7 +267,7 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
                 reply = (
                     f"🎉 Booking successfully confirmed! Your booking ID is {booking['booking_id']}. "
                     f"Order details: {state.quantity} unit(s) of {booking['product_name']} "
-                    f"on the {state.plan_code} plan{promo_text} for a final total of ${state.final_price:.2f}. "
+                    f"on the {state.plan_code} plan{promo_text} for a final total of ₹{state.final_price:,.2f}. "
                     f"Thank you for choosing Hotelzify!"
                 )
                 executed_api = {
@@ -293,7 +294,7 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
                 f"I noticed you updated your requirement to {state.required_capacity} rooms. "
                 f"For {state.required_capacity} rooms, you will need {state.quantity} unit(s) of {product['name']} "
                 f"({product['max_capacity_per_unit']} rooms per unit) on the {state.plan_code} plan. "
-                f"Your updated total is ${state.final_price:.2f}"
+                f"Your updated total is ₹{state.final_price:,.2f}"
                 + (f" with promo code {state.promo_code}." if state.promo_code else ".")
                 + " Before I complete the booking, please confirm if you're happy with these updated details!"
             )
@@ -306,7 +307,7 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
                     f"I completely understand budget is essential. Because you're outfitting {state.required_capacity or state.quantity} room(s) today, "
                     f"I can offer our courtesy code **{tier_info['code']}** for 10% off! "
                     f"This reduces your total for {state.quantity} unit(s) of {state.product_name} ({state.plan_code}) "
-                    f"from ${state.unit_price * state.quantity:.2f} down to **${state.final_price:.2f}**. "
+                    f"from ₹{state.unit_price * state.quantity:,.2f} down to **₹{state.final_price:,.2f}**. "
                     f"Shall I go ahead and book this for you?"
                 )
             elif state.discount_tier == 2:
@@ -314,7 +315,7 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
                     f"I really want to earn your business. I'm authorized to unlock our executive closing code **{tier_info['code']}** "
                     f"for 15% off—this is our absolute maximum authorized discount. "
                     f"Your final price for {state.quantity} unit(s) of {state.product_name} ({state.plan_code}) "
-                    f"is now just **${state.final_price:.2f}**! "
+                    f"is now just **₹{state.final_price:,.2f}**! "
                     f"Can I confirm your booking now?"
                 )
         
@@ -323,7 +324,7 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
             reply = (
                 f"I appreciate your negotiation, but **15% off via {state.promo_code}** is the absolute maximum discount "
                 f"authorized by our management. We cannot accept unauthorized codes or provide further reductions. "
-                f"Your final price remains **${state.final_price:.2f}** for {state.quantity} unit(s). "
+                f"Your final price remains **₹{state.final_price:,.2f}** for {state.quantity} unit(s). "
                 f"Would you like me to book this now?"
             )
         
@@ -336,7 +337,7 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
             reply = (
                 f"Great choice with the **{product['name']}** on the **{state.plan_code}** plan! "
                 f"{cap_explanation} "
-                f"At ${state.unit_price:.2f} per unit, your total is **${state.final_price:.2f}**"
+                f"At ₹{state.unit_price:,.2f} per unit, your total is **₹{state.final_price:,.2f}**"
                 + (f" (including {state.promo_code} for 10% off)." if state.discount_tier == 1 else "")
                 + (f" (including {state.promo_code} for 15% off)." if state.discount_tier == 2 else " (standard pricing, promo_code=None).")
                 + " Would you like me to go ahead and confirm your booking?"

@@ -36,7 +36,7 @@ async def main():
             print(f"  • Plan: {state.get('plan_code')}")
             print(f"  • Capacity / Qty: {state.get('required_capacity')} rooms -> {state.get('quantity')} units")
             print(f"  • Discount Tier: {state.get('discount_tier')} (Code: {state.get('promo_code')})")
-            print(f"  • Final Price: ${state.get('final_price', 0.0):.2f}")
+            print(f"  • Final Price: ₹{state.get('final_price', 0.0):,.2f}")
             print(f"  • Confirmed: {state.get('is_confirmed')} | Booking: {state.get('booking_status')}")
 
             if result.get("executed_api"):

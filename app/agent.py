@@ -63,10 +63,11 @@ class SalesAgent:
                     f"- Product: {state.get('product_name')}\n"
                     f"- Plan: {state.get('plan_code')}\n"
                     f"- Quantity: {state.get('quantity')}\n"
+                    f"- Currency: INR (₹)\n"
                     f"- Promo Code: {state.get('promo_code')}\n"
-                    f"- Final Price: ${state.get('final_price', 0.0):.2f}\n"
+                    f"- Final Price: ₹{state.get('final_price', 0.0):,.2f}\n"
                     f"- Baseline Message: {result['message']}\n"
-                    f"Refine this into a polished, professional sales message matching the persona. Do not change any numbers, codes, or products."
+                    f"Refine this into a polished, professional sales message matching the persona. Do not change any numbers, codes, or products. Always express currency in INR (₹)."
                 )
 
                 response = await self.openai_client.chat.completions.create(

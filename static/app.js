@@ -67,7 +67,7 @@ function updateStateInspector(state) {
   const promoLabel = state.promo_code ? `${state.promo_code} (${Math.round(state.discount_rate * 100)}%)` : "None (0%)";
   statePromo.innerText = `Tier ${state.discount_tier} (${promoLabel})`;
   
-  statePrice.innerText = `$${(state.final_price || 0).toFixed(2)}`;
+  statePrice.innerText = `₹${(state.final_price || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
   stateConfirmed.innerText = state.is_confirmed ? "✅ Yes" : "❌ No";
   stateConfirmed.className = state.is_confirmed ? "font-mono font-semibold text-emerald-400" : "font-mono font-semibold text-amber-400";
 

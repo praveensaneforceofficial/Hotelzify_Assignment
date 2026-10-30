@@ -86,11 +86,13 @@ async def chat_endpoint(req: ChatRequest):
         session_id=req.session_id,
         user_message=req.message
     )
+    # Return per-session clean API logs (1 GET on inquiry, 1 POST on booking)
+    session_logs = result["state"].get("session_api_logs", [])
     return {
         "reply": result["message"],
         "state": result["state"],
         "executed_api": result.get("executed_api"),
-        "api_call_logs": API_CALL_LOGS[-10:]  # Last 10 logs for live inspector
+        "api_call_logs": session_logs
     }
 
 

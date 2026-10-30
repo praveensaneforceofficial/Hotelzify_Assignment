@@ -145,7 +145,10 @@ async def get_catalog_info(query: Optional[str] = None) -> Dict[str, Any]:
     for sku_id, item in CATALOG.items():
         if query:
             q_lower = query.lower()
-            if q_lower not in item["name"].lower() and not any(q_lower in a for a in item.get("aliases", [])):
+            matches_sku = q_lower in sku_id.lower()
+            matches_name = q_lower in item["name"].lower()
+            matches_alias = any(q_lower in a for a in item.get("aliases", []))
+            if not (matches_sku or matches_name or matches_alias):
                 continue
         catalog_view[sku_id] = {
             "name": item["name"],

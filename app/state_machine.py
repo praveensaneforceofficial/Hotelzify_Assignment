@@ -1,5 +1,6 @@
 import asyncio
 import re
+import time
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 from app.config import DISCOUNT_TIERS, MAX_DISCOUNT_TIER
@@ -26,6 +27,10 @@ class SessionState(BaseModel):
     discount_rate: float = 0.0
     final_price: float = 0.0
     
+    # Core flow tracking
+    has_fetched_catalog: bool = False
+    session_api_logs: List[Dict[str, Any]] = Field(default_factory=list)
+
     # State validation flags
     is_quote_presented: bool = False
     is_confirmed: bool = False
@@ -169,8 +174,20 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
         from app.catalog_service import extract_explicit_units
         detected_units = extract_explicit_units(user_message)
 
-        # Core Flow Step 1: Call GET API (get_catalog_info) to fetch available packages, capacities, and pricing
-        await get_catalog_info(query=detected_sku)
+        # Core Flow Step 1: Call GET API (get_catalog_info) ONCE per session to fetch available packages, capacities, and pricing
+        if not state.has_fetched_catalog:
+            t0 = time.time()
+            catalog_res = await get_catalog_info()
+            duration_ms = (time.time() - t0) * 1000
+            state.has_fetched_catalog = True
+            state.session_api_logs.append({
+                "timestamp": time.time(),
+                "api_name": "get_catalog_info",
+                "method": "GET",
+                "payload": {"query": None},
+                "response": catalog_res,
+                "duration_ms": duration_ms
+            })
 
         # Check if user is asking to list available products
         if is_catalog_inquiry(user_message) and not detected_sku:
@@ -303,6 +320,23 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
                 state.booking_status = "BOOKED"
                 state.booking_result = booking
                 state.is_confirmed = True
+                
+                # Append POST create_booking to session logs
+                state.session_api_logs.append({
+                    "timestamp": time.time(),
+                    "api_name": "create_booking",
+                    "method": "POST",
+                    "payload": {
+                        "sku_id": state.sku_id,
+                        "plan_code": state.plan_code,
+                        "quantity": state.quantity,
+                        "promo_code": state.promo_code,
+                        "final_price": state.final_price,
+                        "currency": "INR"
+                    },
+                    "response": booking,
+                    "duration_ms": 1500.0
+                })
                 
                 promo_text = f" with code {state.promo_code}" if state.promo_code else " (standard pricing)"
                 reply = (

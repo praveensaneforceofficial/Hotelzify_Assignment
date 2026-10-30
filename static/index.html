@@ -53,36 +53,17 @@
     <!-- LEFT: Interactive Chat Section (60%) -->
     <section class="lg:w-7/12 flex flex-col bg-slate-800/60 rounded-2xl border border-slate-700/80 overflow-hidden shadow-xl backdrop-blur-sm">
       
-      <!-- Scenario Quick Test Buttons -->
-      <div class="bg-slate-800 border-b border-slate-700/70 p-3 text-xs">
-        <div class="text-slate-400 font-semibold mb-2 flex items-center justify-between">
-          <span>⚡ QUICK TEST RUNNERS (INTERVIEW SCENARIOS):</span>
-          <span class="text-[10px] text-slate-500">Click to autofill & send</span>
+      <!-- Chat Header -->
+      <div class="bg-slate-800/90 border-b border-slate-700/70 px-4 py-3 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2 text-slate-300 font-medium">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Live Sales Representative (Online)</span>
         </div>
-        <div class="grid grid-cols-2 gap-1.5">
-          <button onclick="sendQuickPrompt('I need AeroMesh Wi-Fi on the PRO plan for a 5-room house')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
-            1️⃣ <span class="font-medium text-blue-400">S1:</span> AeroMesh 5 rooms (PRO)
-          </button>
-          <button onclick="sendQuickPrompt('Do you have Netgear Orbi router for 5 rooms?')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
-            1️⃣ <span class="font-medium text-amber-400">S1:</span> Unknown Item (Netgear)
-          </button>
-          <button onclick="sendQuickPrompt('That is too expensive for our budget. Can you offer a discount?')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
-            2️⃣ <span class="font-medium text-emerald-400">S2:</span> 1st Objection (SAVE10)
-          </button>
-          <button onclick="sendQuickPrompt('Still too high. Can you give me 20% or your absolute best price?')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
-            2️⃣ <span class="font-medium text-purple-400">S2:</span> 2nd Objection (CLOSENOW15)
-          </button>
-          <button onclick="sendQuickPrompt('Actually change to 7 rooms on PRO plan and book it!')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
-            3️⃣ <span class="font-medium text-rose-400">S3:</span> Mid-Change Dirty Check
-          </button>
-          <button onclick="sendDoubleConfirmation()" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
-            4️⃣ <span class="font-medium text-cyan-400">S4:</span> Rapid Double "Yes, book it!"
-          </button>
-        </div>
+        <span class="text-slate-400 text-[11px]">Instant Assistance & Negotiation</span>
       </div>
 
       <!-- Chat Messages Container -->
-      <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-[380px] max-h-[500px]">
+      <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-[460px] max-h-[580px]">
         <!-- Initial Welcome Message -->
         <div class="flex items-start gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs shrink-0 mt-0.5">

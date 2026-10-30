@@ -15,7 +15,7 @@ CATALOG: Dict[str, Dict[str, Any]] = {
             "STD": 20000.0,
             "CARE": 24000.0
         },
-        "aliases": ["airpods", "airpod pro", "apple airpods", "airpod", "pods", "airpods pro 2nd gen"]
+        "aliases": ["airpods", "airpod pro", "apple airpods", "airpod", "airpd", "pods", "airpods pro 2nd gen", "air pod"]
     },
     # 2. Core Required Evaluation Item 2
     "SKU_MESH_WIFI6": {

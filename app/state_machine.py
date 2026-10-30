@@ -3,7 +3,7 @@ import re
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field
 from app.config import DISCOUNT_TIERS, MAX_DISCOUNT_TIER
-from app.mock_apis import CATALOG, create_booking
+from app.mock_apis import CATALOG, create_booking, get_catalog_info
 from app.catalog_service import (
     calculate_units_needed,
     resolve_sku_from_text,
@@ -157,6 +157,9 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
         from app.catalog_service import extract_explicit_units
         detected_units = extract_explicit_units(user_message)
 
+        # Core Flow Step 1: Call GET API (get_catalog_info) to fetch available packages, capacities, and pricing
+        await get_catalog_info(query=detected_sku)
+
         # Check for unknown / non-catalog request
         msg_lower = user_message.lower()
         if any(brand in msg_lower for brand in ["netgear", "orbi", "eero", "google nest", "tp-link", "cisco"]):
@@ -198,6 +201,11 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
             if new_qty != state.quantity:
                 state.quantity = new_qty
                 is_modified = True
+        elif state.sku_id and state.required_capacity is None and CATALOG[state.sku_id]["max_capacity_per_unit"] == 1 and state.quantity == 0:
+            # For 1-person/1-room personal items like AirPods Pro, default to 1 unit if unspecified
+            state.required_capacity = 1
+            state.quantity = 1
+            is_modified = True
         elif detected_units and detected_units != state.quantity:
             # User specified different units directly without stating rooms
             state.quantity = detected_units
@@ -341,6 +349,18 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
                 + (f" (including {state.promo_code} for 10% off)." if state.discount_tier == 1 else "")
                 + (f" (including {state.promo_code} for 15% off)." if state.discount_tier == 2 else " (standard pricing, promo_code=None).")
                 + " Would you like me to go ahead and confirm your booking?"
+            )
+        
+        elif state.sku_id and state.quantity == 0:
+            # Product matched, but user has not yet specified room count or quantity
+            product = CATALOG[state.sku_id]
+            plans_text = ", ".join([f"{plan}: ₹{price:,.2f}" for plan, price in product["plans"].items()])
+            cap = product["max_capacity_per_unit"]
+            reply = (
+                f"We have the **{product['name']}** in our catalog! "
+                f"Available plans: {plans_text}. "
+                f"Each unit covers up to **{cap} room(s)**. "
+                f"How many rooms or units do you need to cover?"
             )
         
         else:

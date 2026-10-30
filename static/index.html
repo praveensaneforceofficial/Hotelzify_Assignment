@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotelzify AI Sales Agent — 100% Accuracy Challenge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .chat-bubble-user {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+    }
+    .chat-bubble-bot {
+      background: #f1f5f9;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+    }
+    pre {
+      font-family: 'Consolas', 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="bg-slate-800/90 border-b border-slate-700/80 px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-md">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+        <i class="fa-solid fa-robot text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+          Hotelzify AI Sales Agent
+          <span class="text-xs bg-emerald-500/20 text-emerald-400 font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30">100% Accuracy Guarantee</span>
+        </h1>
+        <p class="text-xs text-slate-400">Deterministic State Machine + Concurrency Safe Guardrails</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button id="btn-reset" class="px-3.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-medium transition flex items-center gap-1.5 border border-slate-600">
+        <i class="fa-solid fa-rotate-left"></i> Reset Session
+      </button>
+      <div class="text-xs text-slate-400 border-l border-slate-700 pl-3">
+        Session: <span id="session-id-display" class="font-mono text-blue-400 font-medium">sess_demo</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Split-Screen Container -->
+  <main class="flex-1 flex flex-col lg:flex-row overflow-hidden max-w-7xl w-full mx-auto p-4 gap-4">
+
+    <!-- LEFT: Interactive Chat Section (60%) -->
+    <section class="lg:w-7/12 flex flex-col bg-slate-800/60 rounded-2xl border border-slate-700/80 overflow-hidden shadow-xl backdrop-blur-sm">
+      
+      <!-- Scenario Quick Test Buttons -->
+      <div class="bg-slate-800 border-b border-slate-700/70 p-3 text-xs">
+        <div class="text-slate-400 font-semibold mb-2 flex items-center justify-between">
+          <span>⚡ QUICK TEST RUNNERS (INTERVIEW SCENARIOS):</span>
+          <span class="text-[10px] text-slate-500">Click to autofill & send</span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button onclick="sendQuickPrompt('I need AeroMesh Wi-Fi on the PRO plan for a 5-room house')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
+            1️⃣ <span class="font-medium text-blue-400">S1:</span> AeroMesh 5 rooms (PRO)
+          </button>
+          <button onclick="sendQuickPrompt('Do you have Netgear Orbi router for 5 rooms?')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
+            1️⃣ <span class="font-medium text-amber-400">S1:</span> Unknown Item (Netgear)
+          </button>
+          <button onclick="sendQuickPrompt('That is too expensive for our budget. Can you offer a discount?')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
+            2️⃣ <span class="font-medium text-emerald-400">S2:</span> 1st Objection (SAVE10)
+          </button>
+          <button onclick="sendQuickPrompt('Still too high. Can you give me 20% or your absolute best price?')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
+            2️⃣ <span class="font-medium text-purple-400">S2:</span> 2nd Objection (CLOSENOW15)
+          </button>
+          <button onclick="sendQuickPrompt('Actually change to 7 rooms on PRO plan and book it!')" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
+            3️⃣ <span class="font-medium text-rose-400">S3:</span> Mid-Change Dirty Check
+          </button>
+          <button onclick="sendDoubleConfirmation()" class="px-2.5 py-1.5 rounded bg-slate-700/80 hover:bg-slate-600 text-left truncate text-slate-200 border border-slate-600/60 transition">
+            4️⃣ <span class="font-medium text-cyan-400">S4:</span> Rapid Double "Yes, book it!"
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat Messages Container -->
+      <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-[380px] max-h-[500px]">
+        <!-- Initial Welcome Message -->
+        <div class="flex items-start gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs shrink-0 mt-0.5">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="chat-bubble-bot p-3.5 rounded-2xl rounded-tl-sm max-w-[85%] text-sm shadow-sm">
+            <p class="font-semibold text-blue-700 mb-1">Hotelzify Sales Concierge</p>
+            Hello! I am your sales specialist for Hotelzify enterprise hardware. We offer Wi-Fi mesh systems, smart door locks, climate controls, conference bars, and more. How many rooms or guests are you looking to equip today?
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input Form -->
+      <form id="chat-form" class="p-3 bg-slate-800/90 border-t border-slate-700/80 flex items-center gap-2">
+        <input 
+          type="text" 
+          id="chat-input" 
+          placeholder="Ask about products, negotiate prices, or confirm booking..." 
+          class="flex-1 bg-slate-900 text-slate-100 text-sm px-4 py-2.5 rounded-xl border border-slate-700 focus:outline-none focus:border-blue-500 transition placeholder:text-slate-500"
+          autocomplete="off"
+        />
+        <button 
+          type="submit" 
+          id="btn-send"
+          class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-lg shadow-blue-600/20"
+        >
+          <span>Send</span>
+          <i class="fa-solid fa-paper-plane text-xs"></i>
+        </button>
+      </form>
+    </section>
+
+    <!-- RIGHT: Live Inspector & API Call Logs (40%) -->
+    <section class="lg:w-5/12 flex flex-col gap-4">
+      
+      <!-- 1. Real-time Deterministic State Machine Card -->
+      <div class="bg-slate-800/60 rounded-2xl border border-slate-700/80 p-4 shadow-xl">
+        <div class="flex items-center justify-between mb-3 border-b border-slate-700/60 pb-2">
+          <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-microchip text-blue-400"></i>
+            Deterministic State Inspector
+          </h2>
+          <span id="booking-badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-700 text-slate-300 uppercase tracking-wide">IDLE</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">Identified Product</span>
+            <span id="state-sku" class="font-mono font-semibold text-slate-200">None</span>
+          </div>
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">Selected Plan</span>
+            <span id="state-plan" class="font-mono font-semibold text-slate-200">None</span>
+          </div>
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">Rooms / Calculated Qty</span>
+            <span id="state-qty" class="font-mono font-semibold text-blue-400">0 rooms → 0 units</span>
+          </div>
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">Discount Tier & Promo</span>
+            <span id="state-promo" class="font-mono font-semibold text-emerald-400">Tier 0 (0% - None)</span>
+          </div>
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">Final Price</span>
+            <span id="state-price" class="font-mono font-bold text-base text-yellow-400">$0.00</span>
+          </div>
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            <span class="text-slate-400 block text-[10px]">Quote Confirmed?</span>
+            <span id="state-confirmed" class="font-mono font-semibold text-slate-400">No</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Live API Call Logs Viewer -->
+      <div class="bg-slate-800/60 rounded-2xl border border-slate-700/80 p-4 shadow-xl flex-1 flex flex-col overflow-hidden">
+        <div class="flex items-center justify-between mb-2 border-b border-slate-700/60 pb-2">
+          <h2 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-network-wired text-emerald-400"></i>
+            Live API Calls & Payloads
+          </h2>
+          <span class="text-[10px] text-slate-400 font-mono">Simulated Latency: ~1.5s</span>
+        </div>
+        
+        <div id="api-logs-container" class="flex-1 overflow-y-auto space-y-2 max-h-[300px] text-xs font-mono pr-1">
+          <div class="text-slate-500 italic p-3 text-center">No API calls recorded yet. Interact with the bot to see payloads.</div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Script logic -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

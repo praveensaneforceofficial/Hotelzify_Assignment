@@ -122,17 +122,20 @@ def recalculate_pricing(state: SessionState):
     Deterministic pricing formula:
     Price = Unit Price * Quantity * (1 - Discount Rate)
     """
-    if not state.sku_id or not state.plan_code or state.quantity <= 0:
-        state.final_price = 0.0
-        return
+    if state.sku_id and state.sku_id in CATALOG:
+        product = CATALOG[state.sku_id]
+        state.product_name = product["name"]
+        if not state.plan_code:
+            state.plan_code = "STD" if "STD" in product["plans"] else list(product["plans"].keys())[0]
+        state.unit_price = product["plans"].get(state.plan_code, 0.0)
 
-    product = CATALOG[state.sku_id]
-    state.product_name = product["name"]
-    state.unit_price = product["plans"].get(state.plan_code, 0.0)
-    
     tier_info = DISCOUNT_TIERS[state.discount_tier]
     state.promo_code = tier_info["code"]
     state.discount_rate = tier_info["rate"]
+
+    if not state.sku_id or not state.plan_code or state.quantity <= 0:
+        state.final_price = 0.0
+        return
 
     raw_total = state.unit_price * state.quantity
     discount_amount = raw_total * state.discount_rate
@@ -272,6 +275,23 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
         discount_offered = False
 
         if objection:
+            if state.quantity <= 0:
+                # Cannot calculate or offer discounts on 0 units. Scenario 2 requires quoting standard price first!
+                product_name = state.product_name or (CATALOG[state.sku_id]["name"] if state.sku_id else "this package")
+                cap = CATALOG[state.sku_id]["max_capacity_per_unit"] if state.sku_id else 2
+                reply = (
+                    f"I would be glad to discuss special pricing and discounts for **{product_name}**! "
+                    f"However, to calculate your quote and apply any discount, could you please tell me how many rooms or units you are looking to cover? "
+                    f"(Each unit covers up to {cap} rooms)."
+                )
+                state.history.append({"role": "assistant", "content": reply})
+                return {
+                    "action": "ROOMS_REQUIRED_FOR_DISCOUNT",
+                    "message": reply,
+                    "state": state.model_dump(),
+                    "executed_api": None
+                }
+
             if state.discount_tier == 0:
                 # 1st objection: offer SAVE10 (10% off)
                 state.discount_tier = 1

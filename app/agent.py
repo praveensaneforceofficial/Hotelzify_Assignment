@@ -48,8 +48,8 @@ class SalesAgent:
         """
         result = await process_user_turn(session_id, user_message)
         
-        # If the state machine executed a booking or a hard rejection, return deterministic response immediately
-        if result["action"] in ("ALREADY_BOOKED", "BOOKING_PENDING", "NON_CATALOG_REJECTED"):
+        # If the state machine executed a booking, catalog list, or specific guidance, return deterministic response immediately
+        if result["action"] in ("ALREADY_BOOKED", "BOOKING_PENDING", "NON_CATALOG_REJECTED", "ROOMS_REQUIRED_FOR_DISCOUNT", "CATALOG_LISTED"):
             return result
 
         # Optional: Enrich message via OpenAI if available and desired

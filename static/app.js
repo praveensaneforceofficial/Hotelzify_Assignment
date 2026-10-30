@@ -56,26 +56,43 @@ function renderApiLogs(logs) {
   if (!logs || logs.length === 0) return;
   apiLogsContainer.innerHTML = "";
   
-  logs.slice().reverse().forEach(log => {
+  logs.slice().reverse().forEach((log, index) => {
     const card = document.createElement("div");
-    card.className = "p-3 rounded-lg bg-white border border-slate-200 shadow-xs text-[11px] space-y-1.5";
+    card.className = "rounded-lg bg-white border border-slate-200 shadow-xs text-[11px] overflow-hidden";
     
     const isPost = log.method === "POST";
-    const badgeColor = isPost ? "text-amber-700 bg-amber-50 border-amber-200" : "text-blue-700 bg-blue-50 border-blue-200";
+    const badgeColor = isPost 
+      ? "text-amber-800 bg-amber-100 border-amber-300" 
+      : "text-blue-800 bg-blue-100 border-blue-300";
     
     card.innerHTML = `
-      <div class="flex items-center justify-between border-b border-slate-100 pb-1">
-        <span class="font-bold ${badgeColor} px-2 py-0.5 rounded border text-[10px]">${log.method} ${log.api_name}</span>
-        <span class="text-slate-400 text-[10px]">${Math.round(log.duration_ms)}ms</span>
-      </div>
-      <div>
-        <span class="text-slate-500 font-semibold block text-[10px]">Payload:</span>
-        <pre class="bg-slate-50 p-1.5 rounded border border-slate-100 text-slate-700 text-[10px] overflow-x-auto">${JSON.stringify(log.payload, null, 2)}</pre>
-      </div>
-      <div>
-        <span class="text-slate-500 font-semibold block text-[10px]">Response:</span>
-        <pre class="bg-slate-50 p-1.5 rounded border border-slate-100 text-emerald-700 text-[10px] overflow-x-auto">${JSON.stringify(log.response, null, 2)}</pre>
-      </div>
+      <details class="group" ${index === 0 ? "open" : ""}>
+        <summary class="flex items-center justify-between p-2.5 cursor-pointer hover:bg-slate-50 transition list-none">
+          <div class="flex items-center gap-2">
+            <span class="font-bold font-mono ${badgeColor} px-2 py-0.5 rounded border text-[10px]">
+              ${log.method} ${log.api_name}
+            </span>
+            <span class="text-emerald-600 font-semibold text-[10px]">● 200 OK</span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-500 text-[10px]">
+            <span>${Math.round(log.duration_ms)}ms</span>
+            <span class="text-blue-600 font-medium group-open:rotate-180 transition-transform">
+              <i class="fa-solid fa-chevron-down"></i>
+            </span>
+          </div>
+        </summary>
+        
+        <div class="p-3 border-t border-slate-100 bg-slate-50/70 space-y-2">
+          <div>
+            <span class="text-slate-500 font-semibold block text-[10px] uppercase tracking-wider">Payload</span>
+            <pre class="bg-white p-2 rounded border border-slate-200 text-slate-800 text-[10px] overflow-x-auto font-mono mt-0.5">${JSON.stringify(log.payload, null, 2)}</pre>
+          </div>
+          <div>
+            <span class="text-slate-500 font-semibold block text-[10px] uppercase tracking-wider">Response</span>
+            <pre class="bg-white p-2 rounded border border-slate-200 text-emerald-800 text-[10px] overflow-x-auto font-mono mt-0.5">${JSON.stringify(log.response, null, 2)}</pre>
+          </div>
+        </div>
+      </details>
     `;
     apiLogsContainer.appendChild(card);
   });

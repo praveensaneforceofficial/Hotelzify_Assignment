@@ -30,7 +30,11 @@ function appendMessage(sender, text, isError = false) {
     bubble.classList.add("bg-red-50", "border-red-200", "text-red-700");
   }
 
+  // Support clickable product chips: **[Product Name]**
   let formattedText = text
+    .replace(/\*\*\[(.*?)\]\*\*/g, (match, p1) => {
+      return `<button type="button" onclick="selectProduct('${p1}')" class="inline-flex items-center gap-1 px-2.5 py-1 my-0.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold border border-blue-300 transition text-xs cursor-pointer shadow-xs"><i class="fa-solid fa-tag text-[10px] text-blue-600"></i> ${p1}</button>`;
+    })
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\n/g, '<br/>');
 
@@ -112,6 +116,12 @@ async function sendMessage(text) {
 }
 
 
+function selectProduct(productName) {
+  const prompt = `I need ${productName}`;
+  sendMessage(prompt);
+}
+
+
 chatForm.addEventListener("submit", (e) => {
   e.preventDefault();
   sendMessage(chatInput.value);
@@ -132,7 +142,21 @@ btnReset.addEventListener("click", async () => {
         AI
       </div>
       <div class="chat-bubble-bot p-3 rounded-xl max-w-[85%] text-sm shadow-sm leading-relaxed">
-        Session reset! Welcome back. How many rooms or tables are you looking to equip today?
+        Session reset! Click any product below to get started, or ask about our catalog:
+        <div class="mt-2.5 flex flex-wrap gap-1.5">
+          <button type="button" onclick="selectProduct('AeroMesh Wi-Fi 6E Home Pack')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold border border-blue-300 transition text-xs cursor-pointer shadow-xs">
+            <i class="fa-solid fa-wifi text-[10px] text-blue-600"></i> AeroMesh Wi-Fi 6E
+          </button>
+          <button type="button" onclick="selectProduct('SyncHub Conference Bar')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold border border-blue-300 transition text-xs cursor-pointer shadow-xs">
+            <i class="fa-solid fa-video text-[10px] text-blue-600"></i> SyncHub Conference Bar
+          </button>
+          <button type="button" onclick="selectProduct('AirPods Pro 2nd Gen')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold border border-blue-300 transition text-xs cursor-pointer shadow-xs">
+            <i class="fa-solid fa-headphones text-[10px] text-blue-600"></i> AirPods Pro 2nd Gen
+          </button>
+          <button type="button" onclick="sendMessage('What are the products available?')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium border border-slate-300 transition text-xs cursor-pointer">
+            <i class="fa-solid fa-list text-[10px] text-slate-500"></i> View All Products
+          </button>
+        </div>
       </div>
     </div>
   `;

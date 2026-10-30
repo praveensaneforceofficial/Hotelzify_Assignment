@@ -67,6 +67,18 @@ class SessionManager:
 session_manager = SessionManager()
 
 
+def is_catalog_inquiry(message: str) -> bool:
+    """Detects if user is asking to see available products or catalog."""
+    patterns = [
+        r"what.*product", r"available.*product", r"product.*avail",
+        r"list.*product", r"show.*product", r"what.*you.*sell",
+        r"what.*you.*have", r"what.*options", r"all.*product",
+        r"catalog", r"packages"
+    ]
+    msg = message.lower()
+    return any(re.search(p, msg) for p in patterns)
+
+
 def is_price_objection(message: str) -> bool:
     """Detects if user is negotiating or objecting to price."""
     objection_patterns = [
@@ -159,6 +171,27 @@ async def process_user_turn(session_id: str, user_message: str) -> Dict[str, Any
 
         # Core Flow Step 1: Call GET API (get_catalog_info) to fetch available packages, capacities, and pricing
         await get_catalog_info(query=detected_sku)
+
+        # Check if user is asking to list available products
+        if is_catalog_inquiry(user_message) and not detected_sku:
+            products_list = []
+            for sku_id, p in CATALOG.items():
+                min_price = min(p["plans"].values())
+                cap = p["max_capacity_per_unit"]
+                products_list.append(f"• **[{p['name']}]** — Covers {cap} room(s)/unit, from ₹{min_price:,.0f}")
+            
+            reply = (
+                "Here are our available hotel technology packages. **Click on any product** to get instant pricing and capacity options:\n\n"
+                + "\n".join(products_list)
+                + "\n\nWhich product would you like to explore?"
+            )
+            state.history.append({"role": "assistant", "content": reply})
+            return {
+                "action": "CATALOG_LISTED",
+                "message": reply,
+                "state": state.model_dump(),
+                "executed_api": None
+            }
 
         # Check for unknown / non-catalog request
         msg_lower = user_message.lower()
